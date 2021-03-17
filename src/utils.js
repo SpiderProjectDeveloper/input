@@ -73,16 +73,6 @@ export function displaySynchronizedStatus() {
 } 
 
 
-// Returns the number of week of the year
-function getWeekNumber(d) {
-	d = new Date( Date.UTC( d.getFullYear(), d.getMonth(), d.getDate() ) );
-	d.setUTCDate( d.getUTCDate() + 4 - (d.getUTCDay() || 7) );
-	var startOfYear = new Date( Date.UTC( d.getUTCFullYear(), 0,1 ) );
-	var weekNumber = Math.ceil( ( ( (d - startOfYear) / 86400000 ) + 1 ) / 7 );
-	return weekNumber;
-}
-
-
 export function parseDate( dateString ) {
 	if( typeof(dateString) === 'undefined' ) {
 		return null;
@@ -105,7 +95,7 @@ export function parseDate( dateString ) {
 			}
 			hr = parsedFull[4];
 			mn = parsedFull[5];
-			date = new Date(y, m-1, d, hr, mn, 0, 0);
+			date = new Date( Date.UTC(y, m-1, d, hr, mn, 0, 0) );
 		}
 	} else {
 		let parsedShort = dateString.match( /([0-9]+)[\.\/\-\:]([0-9]+)[\.\/\-\:]([0-9]+)/ );
@@ -121,7 +111,7 @@ export function parseDate( dateString ) {
 				}
 				hr = 0;
 				mn = 0;
-				date = new Date(y, m-1, d, hr, mn, 0, 0, 0, 0);
+				date = new Date(Date.UTC(y, m-1, d, hr, mn, 0, 0, 0, 0));
 			}
 		}
 	}
@@ -130,57 +120,6 @@ export function parseDate( dateString ) {
 	}
 	let timeInSeconds = date.getTime();
 	return( { 'date':date, 'timeInSeconds':timeInSeconds/1000 } ); 
-}
-
-
-function parseJSDate( dateString ) {
-	if( typeof(dateString) === 'undefined' ) {
-		return null;
-	}
-	if( dateString == null ) {
-		return null;
-	}
-	let date = null;
-	let parsedFull = dateString.match( /([0-9]+)[\.\-\/\:]([0-9]+)[\.\-\/\:]([0-9]+)[ T]+([0-9]+)[\:\.\-\/]([0-9]+)/ );
-	if( parsedFull !== null ) {
-		if( parsedFull.length == 6 ) {
-			date = new Date(parsedFull[1], parsedFull[2]-1, parsedFull[3], parsedFull[4], parsedFull[5], 0, 0);
-		}
-	} else {
-		let parsedShort = dateString.match( /([0-9]+)[\.\-\/\:]([0-9]+)[\.\-\/\:]([0-9]+)/ );
-		if( parsedShort !== null ) {
-			if( parsedShort.length == 4 ) {
-				date = new Date(parsedShort[1], parsedShort[2]-1, parsedShort[3], 0, 0, 0, 0);
-			}
-		}
-	}
-	if( date === null ) {
-		return null;
-	}
-	let timeInSeconds = date.getTime();
-	return( { 'date':date, 'timeInSeconds':timeInSeconds/1000 } ); 
-}
-
-
-function dateIntoJSDateString( date ) {
-	let year = date.getFullYear(); 
-	let month = (date.getMonth()+1);
-	if( month < 10 ) {
-		month = "0" + month;
-	}
-	let day = date.getDate();
-	if( day < 10 ) {
-		day = "0" + day;
-	}
-	let hours = date.getHours();
-	if( hours < 10 ) {
-		hours = "0" + hours;
-	}
-	let minutes = date.getMinutes();
-	if( minutes < 10 ) {
-		minutes = "0" + minutes;
-	}
-	return( year + "-" + month + "-" + day + "T" + hours + ":" +  minutes + ":00" ); 
 }
 
 
@@ -195,12 +134,12 @@ export function dateIntoSpiderDateString( date, dateOnly=false ) {
 		date = new Date( parseInt(date) * 1000 );
 	}
 
-	let year = date.getFullYear(); 
-	let month = (date.getMonth()+1);
+	let year = date.getUTCFullYear(); 
+	let month = (date.getUTCMonth()+1);
 	if( month < 10 ) {
 		month = "0" + month;
 	}
-	let day = date.getDate();
+	let day = date.getUTCDate();
 	if( day < 10 ) {
 		day = "0" + day;
 	}
@@ -210,11 +149,11 @@ export function dateIntoSpiderDateString( date, dateOnly=false ) {
 		spiderDateString = month + _globals.dateDelim + day + _globals.dateDelim + year;		 
 	}
 	if( !dateOnly ) {
-		let hours = date.getHours();
+		let hours = date.getUTCHours();
 		if( hours < 10 ) {
 			hours = "0" + hours;
 		}
-		let minutes = date.getMinutes();
+		let minutes = date.getUTCMinutes();
 		if( minutes < 10 ) {
 			minutes = "0" + minutes;
 		}
@@ -293,44 +232,6 @@ export function getCookie( cname, type='string' ) {
 }
 
 
-function moveElementInsideArrayOfObjects( arr, from, to ) {	
-	var elToMove = {};
-	for( let key in arr[from] ) {
-		elToMove[key] = arr[from][key];
-	}
-	if( from < to ) {
-		for( let i = from+1 ; i <= to ; i++ ) {
-			for( let key in arr[i] ) {
-				arr[i-1][key] = arr[i][key];
-			}
-		}
-	} else if( to < from ) {
-		for( let i = from-1 ; i >= to ; i-- ) {
-			for( let key in arr[i] ) {
-				arr[i+1][key] = arr[i][key];
-			}
-		}
-	}
-	for( let key in elToMove ) {
-		arr[to][key] = elToMove[key];
-	}
-}
-
-
-function copyArrayOfObjects( arrFrom, arrTo ) {	
-	if( arrTo.length == 0 ) {
-		for( let i = 0 ; i < arrFrom.length ; i++ ) {
-			arrTo.push({});
-		}
-	}
-
-	for( let i = 0 ; i < arrFrom.length ; i++ ) {
-		for( let key in arrFrom[i] ) {
-			arrTo[i][key] = arrFrom[i][key];
-		}
-	}
-}
-
 export function decColorToString( decColor, defaultColor=null ) {
 	if( typeof(decColor) !== 'undefined' ) {		
 		if( decColor ) {
@@ -368,13 +269,6 @@ export function isEditable( name ) {
 	return null;
 }
 
-function padWithNChars( n, char ) {
-	let s = '';
-	for( let i = 0 ; i < n ; i++ ) {
-		s += char;
-	}
-	return s;
-}
 
 export function spacesToPadNameAccordingToHierarchy( hierarchy ) {
 	let s = '';
@@ -387,20 +281,6 @@ export function spacesToPadNameAccordingToHierarchy( hierarchy ) {
 	return s;
 }
 
-
-export function removeClassFromElement( element, className ) {
-	let replace = '\\b' + className + '\\b';
-	let re = new RegExp(replace,'g');
-	element.className = element.className.replace(re, '');
-}
-
-function addClassToElement( element, className ) {
-	let classArray;
-	classArray = element.className.split(' ');
-	if( classArray.indexOf( className ) == -1 ) {
-		element.className += " " + className;
-	}
-}
 
 
 function findPositionOfElementAtPage( el ) {
@@ -416,27 +296,6 @@ function findPositionOfElementAtPage( el ) {
 	}
 }
 
-
-function getCoordinatesOfClickOnImage( imgId, event ) {
-	let posX = 0, posY = 0;
-	let imgPos = findPositionOfElementAtPage( imgId );
-	let e = ( event ) ? event : window.event;
-
-	if( e.pageX || e.pageY ) {
-		posX = e.pageX;
-		posY = e.pageY;
-	} else if( e.clientX || e.clientY ) {
-		posX = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-		posY = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
-	}
-	posX = posX - imgPos[0];
-	posY = posY - imgPos[1];
-
-	let right = ( posX > parseInt( imgId.clientWidth/2 ) ) ? 1 : 0;
-	let lower = ( posY > parseInt( imgId.clientHeight/2 ) ) ? 1 : 0;
-
-	return [ posX, posY, right, lower ];
-}
 
 
 export function filterInput( id, patternStr='([^0-9]+)', minValue=100, maxValue=10000, defaultValue=100 ) {
