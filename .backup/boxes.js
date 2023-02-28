@@ -574,9 +574,8 @@ function getCalendarFormat() {
 }
 
 
-function createUserDataObjectToSendAfterEditingInBox( i ) 
-{
-  let formData = new FormData();
+function createUserDataObjectToSendAfterEditingInBox( i ) {
+    let formData = new FormData();
 
 	let userData = {};
 	userData[ 'Level' ] = _data.activities[i]['Level'];			

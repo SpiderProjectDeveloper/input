@@ -17,6 +17,9 @@ export function drawTableHeader() {
 
 	let left = 0;
 	for( let col = 1 ; col < _data.fields.length ; col++ ) {
+		if( _data.fields[col].hidden === 1 ) {
+			continue;
+		}		
 		left += _data.fields[col].width;
 		let title = _data.fields[col].Name;
 		if( _data.refSettings[ _data.fields[col].Code ].editableType !== null ) {
@@ -98,6 +101,9 @@ export function drawTableContent( init=false, shiftOnly=false ) {
 		}
 
 		for( let col = 1 ; col < _data.fields.length ; col++ ) {
+			if( _data.fields[col].hidden === 1 ) {
+				continue;
+			}			
 			let td = document.createElement('td');
 			td.id = 'tableColumn'+col+'Row'+i; 
 			tr.appendChild(td);
