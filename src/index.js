@@ -29,20 +29,45 @@ initGlobals(appContainer, userName);
 	
 window.addEventListener( "load", onWindowLoad );
 
-function onWindowLoad() {
+window.addEventListener( 	// To unlock data 
+	"visibilitychange", 
+	function(e) 
+	{ 
+		if( _globals.lockDataOn ) {
+			lockData( !_globals.lockDataOn, lockDataSuccessFunction, lockDataErrorFunction );
+		} 
+} );
+
+window.addEventListener(
+	'beforeunload', 
+	function (e) {
+		if( _globals.lockDataOn ) {
+			lockData( !_globals.lockDataOn, lockDataSuccessFunction, lockDataErrorFunction );
+		} 
+		e = e || window.event;
+		e.preventDefault();
+		e.returnValue = '';
+	}
+);
+
+function onWindowLoad() 
+{
 	//document.getElementById('toolboxNewProjectDiv').onclick = function(e) { newProject(); };
 	initGlobalsWithLayoutParameters();
 	loadData();
 }
 
-function loadData() {
-	if( document.location.host ) {
+function loadData() 
+{
+	if( document.location.host ) 
+	{
 		var xmlhttp = new XMLHttpRequest();
-		xmlhttp.onreadystatechange = function() {
+		xmlhttp.onreadystatechange = function() 
+		{
 		    if (this.readyState == 4 ) {
 		    	if( this.status == 200) {
 			    	let errorParsingData = false;
-			    	try{
+			    	try {
 				        setData( JSON.parse(this.responseText) );
 			    	} catch(e) {
 			    		//alert('Error: ' + e.name + ":" + e.message + "\n" + e.stack + "\n" + e.cause);
@@ -54,26 +79,35 @@ function loadData() {
 			    	}
 			    	if( !('activities' in _data) || _data.activities.length == 0 ) {
 							displayMessageBox( _texts[_globals.lang].errorParsingData ); 
-						return;
+							return;
 			    	}
 
 						initGlobalsWithDataParameters();
 
 						var xmlhttpUserData = new XMLHttpRequest();
-						xmlhttpUserData.onreadystatechange = function() {
-							if (this.readyState == 4 ) {
-								let userData = [];
-								if( this.status == 200) {		    
-									userData = csvIntoJSON(this.responseText);
-								} else if( status == 404 ) {
+						xmlhttpUserData.onreadystatechange = function()
+						{
+							if (this.readyState == 4 ) 
+							{
+								let userData = null;
+								if( this.status == 200 ) 
+								{
+									try {
+										userData = JSON.parse(this.responseText)
+										// userData = csvIntoJSON(this.responseText);
+									}	catch(e) {
+										;
+									}
+								} else if( this.status == 404 ) {
 									//_dataSynchronized = 1;
 								}
 								hideMessageBox();		    
-								if( initData() == 0 ) {
+								if( initData() == 0 ) 
+								{
 									if( _data.editables.length == 0 ) {
 										_data.noEditables = true;
 									} else { 	
-										if( userData.length == 0 ) { 				
+										if( userData == null ) { 				
 											_globals.dataSynchronized = -1;
 										} else {
 											setUserData( userData );
@@ -101,13 +135,15 @@ function loadData() {
 	} 
 }
 
-function displayData() {	
+function displayData() 
+{	
 	displayHeaderAndFooterInfo();	
 	drawTableHeader(true);
 	drawTableContent(true);
 }
 
-function initData() {
+function initData() 
+{
 	initGlobalsWithDataParameters();
 
 	_data.project.curTimeInSeconds = _data.project.CurTime;
@@ -135,7 +171,8 @@ function initData() {
 
 	// Creating ref-type array and attaching it to "_data"
 	_data.refSettings = {};
-	for( let col = 0 ; col < _data.fields.length ; col++ ) {
+	for( let col = 0 ; col < _data.fields.length ; col++ ) 
+	{
 		let o = { column: col, type: _data.fields[col].Type, format: _data.fields[col].format, 
 			name: _data.fields[col].Name, editableType: null };
 		for( let ie = 0 ; ie < _data.editables.length ; ie++ ) { 	// Is editable?
@@ -146,7 +183,8 @@ function initData() {
 		_data.refSettings[ _data.fields[col].Code ] = o;
 	}
 
-	for( let i = 0 ; i < _data.activities.length ; i++ ) {
+	for( let i = 0 ; i < _data.activities.length ; i++ ) 
+	{
 		let d = _data.activities[i];
 		d.color = decColorToString( d.f_ColorCom, _settings.ganttOperation0Color );
 		d.colorBack = decColorToString( d.f_ColorBack, "#ffffff" );
@@ -164,17 +202,21 @@ function initData() {
 	}
 
 	// Initializing the parent-children structure and the link structure
-	for( let i = 0 ; i < _data.activities.length ; i++ ) {
+	for( let i = 0 ; i < _data.activities.length ; i++ ) 
+	{
 		_data.activities[i].id = 'ganttRect' + i; // Id
 		initParents(i);
 		_data.activities[i]._isPhase = (typeof(_data.activities[i].Level) === 'number') ? true : false;
 	}
 
 	// Marking 'expandables'
-	for( let i = 0 ; i < _data.activities.length ; i++ ) {
+	for( let i = 0 ; i < _data.activities.length ; i++ ) 
+	{
 		let hasChild = false;
-		for( let j = i+1 ; j < _data.activities.length ; j++ ) {
-			for( let k = 0 ; k < _data.activities[j].parents.length ; k++ ) {
+		for( let j = i+1 ; j < _data.activities.length ; j++ ) 
+		{
+			for( let k = 0 ; k < _data.activities[j].parents.length ; k++ ) 
+			{
 				if( _data.activities[j].parents[k] == i ) { // If i is a parent of j
 					hasChild = true;
 					break;
@@ -197,7 +239,8 @@ function initData() {
 }
 
 
-function initParents( iOperation ) {
+function initParents( iOperation ) 
+{
 	_data.activities[iOperation].parents = []; // Initializing "parents"
 	for( let i = iOperation-1 ; i >= 0 ; i-- ) {
 		let l = _data.activities[iOperation].parents.length;
@@ -231,7 +274,8 @@ function initParents( iOperation ) {
 }
 
 
-function displayHeaderAndFooterInfo() {
+function displayHeaderAndFooterInfo() 
+{
 	let projectName = document.getElementById('projectName');
 	projectName.innerText = _data.project.Name;
 	document.title = "SP | " + _data.project.Name;
@@ -256,49 +300,21 @@ function displayHeaderAndFooterInfo() {
 }
 
 
-function setUserData( userData ) { // Sets user data read from a file
+function setUserData( userData ) 
+{ // Sets user data read from a file
+	if( !('activities' in userData) ) return false;
+	if( _data.activities.length != userData.activities.length ) return false;
+
 	let ok = true;
 	try {
-		for( let i = 0 ; i < _data.activities.length ; i++ ) { // For all array...
-			for( let iU = 0 ; iU < userData.length ; iU++ ) { // For all userData items...
-				let lineNumber = userData[iU][_settings.webExportLineNumberColumnName];	// The line number inside the exported csv-
-
-				// If the codes are the same and the numbers of lines are the same ...
-				if( !(_data.activities[i].Code == userData[iU].Code && i == lineNumber) ) {
-					continue;
+		for( let i = 0 ; i < _data.activities.length ; i++ ) 
+		{ // For all array...
+			_data.activities[i].userData = {};
+			for( let key in userData.activities[i] ) {
+				if( key in _data.activities[i] ) {
+					_data.activities[i].userData[key] = userData.activities[i][key];
 				}
-				_data.activities[i].userData = {};
-				for( let iE=0 ; iE < _data.editables.length ; iE++ ) {
-					let ref = _data.editables[iE].ref;
-					if( ref in userData[iU] ) {
-						_data.activities[i].userData[ ref ] = userData[iU][ ref ];
-					} else {
-						_data.activities[i].userData[ ref ] = _data.activities[i][ ref ];						
-					}
-				}
-				// Files uploading... 
-				let fnames = [];
-				let unames = [];
-				if( _settings.webExportFileNamesColumn in userData[iU] && _settings.webExportUserFileNamesColumn in userData[iU] ) {
-					fnames = userData[iU][_settings.webExportFileNamesColumn].split('|');
-					unames = userData[iU][_settings.webExportUserFileNamesColumn].split('|');
-				}
-				for( let iF = 0 ; iF < _settings.webExportFilesNumber ; iF++ ) {
-					let refF = _settings.webExportFileNameKey + iF;							
-					let refU = _settings.webExportUserFileNameKey + iF;
-					if( iF < fnames.length ) {
-						_data.activities[i].userData[ refF ] = fnames[iF];						
-					} else {
-						_data.activities[i].userData[ refF ] = '';						
-					}
-					if( iF < unames.length ) {
-						_data.activities[i].userData[ refU ] = unames[iF];						
-					} else {
-						_data.activities[i].userData[ refU ] = '';						
-					}
-				}
-				break;
-			}
+			}			
 		}
 	} catch(e) {
 		ok = false;
@@ -307,8 +323,10 @@ function setUserData( userData ) { // Sets user data read from a file
 }
 
 
-function logout() {
-	if( document.location.host ) {
+function logout() 
+{
+	if( document.location.host ) 
+	{
 		var xmlhttp = new XMLHttpRequest();
 		xmlhttp.onreadystatechange = function() {
 			if (this.readyState == 4 ) {

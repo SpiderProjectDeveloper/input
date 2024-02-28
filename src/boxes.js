@@ -249,7 +249,7 @@ export function displayEditBoxWithData( id ) {
 			return;
 	}
 
-	let i = id.getAttributeNS(null, 'data-i');
+	let i = parseInt( id.getAttributeNS(null, 'data-i') );
 	_editBoxDetailsElem.innerHTML = formatTitleTextContent(i,true);
 	_editBoxOperationIndex = i;
 	for( let iE = 0 ; iE < _data.editables.length ; iE++ ) { // For every editable field...
@@ -363,7 +363,8 @@ export function displayEditBoxWithData( id ) {
 }
 
 
-function saveUserDataFromEditBox() {
+function saveUserDataFromEditBox() 
+{
 	// Validating all the data are entered correctly...
 	for( let iE = 0 ; iE < _data.editables.length ; iE++ ) {
 		let ref = _data.editables[iE].ref;
@@ -577,6 +578,39 @@ function getCalendarFormat() {
 function createUserDataObjectToSendAfterEditingInBox( i ) 
 {
   let formData = new FormData();
+
+	let sendData = { activities: [] };
+	for( let ai = 0 ; ai < _data.activities.length ; ai++ )
+	{
+		sendData.activities.push( {} );
+		sendData.activities[ai]['Code'] = _data.activities[ai]['Code'];
+		sendData.activities[ai]['Level'] = _data.activities[ai]['Level'];
+		for( let iE = 0 ; iE < _data.editables.length ; iE++ ) 
+		{			
+			let ref = _data.editables[iE].ref;
+			if( ai === i )
+			{
+				let elem = document.getElementById( 'editBoxInput' + ref );
+				let value = elem.value;
+				if( _data.refSettings[ref].type === 'datetime' ) {
+					let parsed = parseDate( elem.value );
+					value = ( parsed === null ) ? '' : value = parsed.timeInSeconds;
+				}
+				sendData.activities[ai][ ref ] = value;
+			} else 
+			{
+				if( 'userData' in _data.activities[ai] && ref in _data.activities[ai].userData ) {
+					sendData.activities[ai][ref] = _data.activities[ai].userData[ref];
+				} else {
+					sendData.activities[ai][ref] = _data.activities[ai][ref];
+				}
+			}
+		}
+	}
+	formData.append("data", JSON.stringify(sendData));  
+	return formData;
+
+console.log(sendData);	
 
 	let userData = {};
 	userData[ 'Level' ] = _data.activities[i]['Level'];			

@@ -152,12 +152,11 @@ export function drawTableTd( content, i, ref, td=null, tdTextNode=null )
 	}
 	if( tdTextNode === null )
 		return;	
-	let color = _data.activities[i].colorFont; // _settings.tableContentStrokeColor;
-	let backgroundColor = _data.activities[i].colorBack;
 	let fontStyle = 'normal';
 	let fontWeight = 'normal';
 	let textAlign = 'left';
-	if( 'userData' in _data.activities[i] ) { // If the value has been changed by user and not saved
+	if( 'userData' in _data.activities[i] ) 
+	{ // If the value has been changed by user and not saved
 		if( ref in _data.activities[i].userData ) {
 			let bChanged = false;
 			if( _data.refSettings[ref].editableType === 'datetime' ) {
@@ -168,9 +167,11 @@ export function drawTableTd( content, i, ref, td=null, tdTextNode=null )
 				if( !(Math.abs(_data.activities[i].userData[ref] - _data.activities[i][ref]) < 10e-12) ) {
 					bChanged = true;
 				}
-			} else if( _data.activities[i].userData[ref] != _data.activities[i][ref] ) {
-				bChanged = true;
-			} 
+			} else { 
+				if( _data.activities[i].userData[ref] != _data.activities[i][ref] ) {
+					bChanged = true;
+				} 
+			}
 			if( bChanged ) {
 				fontStyle = "italic";
 				fontWeight = "bold";
