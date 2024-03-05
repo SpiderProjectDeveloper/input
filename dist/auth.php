@@ -31,7 +31,7 @@ function auth( $bAjax=false ) {
 
 	if( $_SERVER['QUERY_STRING'] == 'logout' ) {
 		header("HTTP/1.0 401 Unauthorized");
-		echo "<script>window.location.replace('http://www.spiderproject.com/');</script>";
+		echo "<script>window.location.replace('http://www.spiderproject.pro/');</script>";
 		exit();
 	}
 

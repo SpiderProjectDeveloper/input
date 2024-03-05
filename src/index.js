@@ -331,7 +331,7 @@ function logout()
 		xmlhttp.onreadystatechange = function() {
 			if (this.readyState == 4 ) {
 				if( this.status == 401 ) {
-					window.location.replace('http://www.spiderproject.com/');
+					window.location.replace('http://www.spiderproject.pro/');
 				}
 			}
 		};
