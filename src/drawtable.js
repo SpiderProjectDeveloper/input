@@ -3,8 +3,8 @@ import { _globals, _data } from './globals.js';
 import { spacesToPadNameAccordingToHierarchy, dateIntoSpiderDateString } from './utils.js';
 import { displayEditBoxWithData } from './boxes.js';
 
-export function drawTableHeader() {
-
+export function drawTableHeader() 
+{
 	let tableHead = document.getElementById('dataTableHead');
 	let trHead = document.createElement('tr');
 	tableHead.appendChild(trHead);	
@@ -35,7 +35,8 @@ export function drawTableHeader() {
 var _tableRowExpanded = '▼';
 var _tableRowNotExpanded = '►';
 
-export function drawTableContent( init=false, shiftOnly=false ) {
+export function drawTableContent( init=false, shiftOnly=false ) 
+{
 	let tableBody = document.getElementById('dataTableBody');
 
 	for( let i = 0 ; i < _data.activities.length ; i++ ) {
@@ -44,6 +45,9 @@ export function drawTableContent( init=false, shiftOnly=false ) {
 		tableBody.appendChild(tr);	
 		tr.id = 'tableRow' + i;
 		tr.style.backgroundColor = _data.activities[i].colorBack;
+		if( !_data.activities[i].visible ) {
+			tr.style.display = 'none';
+		}
 
 		// Expand functionality [+] / [-]
 		let expandText='';

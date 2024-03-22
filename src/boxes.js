@@ -610,7 +610,8 @@ function createUserDataObjectToSendAfterEditingInBox( i )
 	formData.append("data", JSON.stringify(sendData));  
 	return formData;
 
-console.log(sendData);	
+	/*
+	console.log(sendData);	
 
 	let userData = {};
 	userData[ 'Level' ] = _data.activities[i]['Level'];			
@@ -660,6 +661,7 @@ console.log(sendData);
     formData.append("data", JSON.stringify(data));  
 
 	return formData;
+	*/
 }
 
 

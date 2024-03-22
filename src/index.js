@@ -227,13 +227,30 @@ function initData()
 			}
 		}
 		if( hasChild ) {
-			_data.activities[i].expanded = true;
+			let expanded = true;
+			let fmc = _data.activities[i].f_MonConv;
+			if( fmc !== undefined && fmc !== null ) {
+				if( fmc === 1 ) {
+					expanded = false;
+				}
+			}
+			_data.activities[i].expanded = expanded;
 			_data.activities[i].expandable = true;
 		} else {
 			_data.activities[i].expanded = true;			
 			_data.activities[i].expandable = false;
 		}
-		_data.activities[i].visible = true;
+
+		let visible = true;
+		if( _data.activities[i].parents && _data.activities[i].parents.length ) {
+			for( let ip of _data.activities[i].parents ) {
+				if( _data.activities[ip].expanded === false ) { 
+					visible = false;
+					break;
+				}
+			}
+		}
+		_data.activities[i].visible = visible;
 	}
 	return(0);
 }
